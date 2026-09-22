@@ -1,0 +1,730 @@
+<title>Cannabis Manufacturing Baseline</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F4F6F8; --surround:#E4E9EE; --surface:#FFFFFF; --sheet:#FFFFFF;
+  --ink:#16202B; --ink-2:#4A5563; --ink-3:#77838F;
+  --line:#D7DEE5; --line-2:#E8EDF2;
+  --accent:#0F8B8D; --accent-ink:#0A5F60; --accent-wash:#E3F4F3;
+  --yellow:#C08A16; --green:#2E7D52; --alert:#C2410C;
+  --shadow:0 1px 2px rgba(20,32,43,.06), 0 8px 28px rgba(20,32,43,.10);
+  --f-display:'Archivo','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#11151A; --surround:#0C1015; --surface:#19202A; --sheet:#FFFFFF;
+  --ink:#E7EDF4; --ink-2:#A3B0BE; --ink-3:#7A8796;
+  --line:#2A3441; --line-2:#222B36;
+  --accent:#33B0B2; --accent-ink:#8FD8D9; --accent-wash:#12302F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 34px rgba(0,0,0,.5);
+}}
+:root[data-theme="dark"]{
+  --bg:#11151A; --surround:#0C1015; --surface:#19202A; --sheet:#FFFFFF;
+  --ink:#E7EDF4; --ink-2:#A3B0BE; --ink-3:#7A8796;
+  --line:#2A3441; --line-2:#222B36;
+  --accent:#33B0B2; --accent-ink:#8FD8D9; --accent-wash:#12302F;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 34px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-body); font-size:14px; line-height:1.5;
+  display:flex; flex-direction:column; overflow:hidden;
+}
+
+header{
+  flex:0 0 auto; background:var(--surface); border-bottom:1px solid var(--line);
+  padding:9px 16px; padding-top:calc(9px + env(safe-area-inset-top,0px));
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+h1{
+  font-family:var(--f-display); font-weight:700; font-size:15.5px; letter-spacing:-.015em;
+  margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; flex:1 1 auto; min-width:0;
+}
+.chip-draft{
+  font-family:var(--f-mono); font-size:10px; font-weight:600; letter-spacing:.09em;
+  color:var(--yellow); border:1px solid var(--yellow); border-radius:4px;
+  padding:2px 7px; white-space:nowrap; flex:0 0 auto;
+}
+.tabs{display:flex; gap:0; border:1px solid var(--line); border-radius:8px; overflow:hidden; flex:0 0 auto}
+.tabs button{
+  font-family:var(--f-body); font-size:13px; color:var(--ink-2); background:var(--surface);
+  border:0; padding:7px 14px; cursor:pointer; line-height:1; white-space:nowrap;
+}
+.tabs button+button{border-left:1px solid var(--line)}
+.tabs button[aria-selected="true"]{background:var(--accent); color:#fff; font-weight:600}
+.tools{display:flex; align-items:center; gap:6px; flex:0 0 auto}
+.tools[hidden]{display:none!important}
+button{font-family:var(--f-body); cursor:pointer}
+.zoomgrp{display:flex; align-items:center; border:1px solid var(--line); border-radius:7px; overflow:hidden}
+.zoomgrp button{border:0; background:var(--surface); color:var(--ink); padding:6px 10px; font-size:15px; line-height:1}
+.zoomgrp button:hover{background:var(--accent-wash)}
+.zoomgrp button+button,#pct+button{border-left:1px solid var(--line)}
+#pct{
+  font-family:var(--f-mono); font-size:11px; font-variant-numeric:tabular-nums;
+  color:var(--ink-2); min-width:48px; text-align:center; padding:0 4px;
+  border-left:1px solid var(--line);
+}
+.ghost{
+  font-size:13px; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line); border-radius:7px; padding:6px 11px; line-height:1;
+}
+.ghost:hover{background:var(--accent-wash); border-color:var(--accent)}
+button:focus-visible,.tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+.rail{
+  flex:0 0 auto; background:var(--surface); border-bottom:1px solid var(--line);
+  display:flex; gap:6px; align-items:center; padding:7px 16px; overflow-x:auto;
+}
+.rail[hidden]{display:none!important}
+.rail-label{
+  font-family:var(--f-mono); font-size:10px; font-weight:600; letter-spacing:.1em;
+  color:var(--ink-3); flex:0 0 auto; padding-right:2px;
+}
+.pchip{
+  flex:0 0 auto; font-size:12px; color:var(--ink-2); background:transparent;
+  border:1px solid var(--line); border-radius:999px; padding:5px 11px;
+  white-space:nowrap; line-height:1;
+}
+.pchip .n{font-family:var(--f-mono); font-weight:600; color:var(--accent-ink); margin-right:6px}
+.pchip:hover{border-color:var(--accent); background:var(--accent-wash)}
+
+#scroll{flex:1 1 auto; overflow:auto; background:var(--surround); scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){#scroll{scroll-behavior:auto}}
+.pane{padding:20px 16px 48px}
+.pane[hidden]{display:none!important}
+.sheet{
+  background:var(--sheet); border-radius:10px; box-shadow:var(--shadow);
+  margin:0 auto; overflow:hidden;
+}
+.sheet svg{display:block; width:100%; height:auto}
+#ovSheet{max-width:1640px}
+#mapSheet{width:1706px; max-width:100%}
+
+.caption{
+  max-width:1640px; margin:0 auto 14px; display:flex; gap:10px; align-items:baseline;
+  flex-wrap:wrap; color:var(--ink-2); font-size:12.5px;
+}
+.caption b{font-family:var(--f-display); font-size:13.5px; color:var(--ink); font-weight:700}
+.caption .k{
+  font-family:var(--f-mono); font-size:10px; letter-spacing:.08em; color:var(--ink-3);
+  border:1px solid var(--line); border-radius:4px; padding:2px 6px;
+}
+</style>
+
+<header>
+  <h1>Cannabis Manufacturing &mdash; AS&#8209;IS Baseline</h1>
+  <span class="chip-draft">DRAFT &middot; NOT YET VERIFIED</span>
+  <div class="tabs" role="tablist">
+    <button role="tab" id="t-ov" aria-selected="true" aria-controls="p-ov">Overview</button>
+    <button role="tab" id="t-map" aria-selected="false" aria-controls="p-map">Detailed map</button>
+  </div>
+  <div class="tools" id="tools" hidden>
+    <div class="zoomgrp">
+      <button id="zout" title="Zoom out" aria-label="Zoom out">&minus;</button>
+      <button id="zin" title="Zoom in" aria-label="Zoom in">+</button>
+      <span id="pct">100%</span>
+    </div>
+    <button class="ghost" id="fitw">Fit width</button>
+  </div>
+</header>
+
+<nav class="rail" id="rail" aria-label="Jump to phase" hidden>
+  <span class="rail-label">PHASE</span>
+</nav>
+
+<div id="scroll">
+  <section class="pane" id="p-ov" role="tabpanel" aria-labelledby="t-ov">
+    <div class="caption">
+      <b>Start here.</b>
+      <span>Eight phases, six teams, two release gates. The matrix shows where each team acts &mdash; and why this process is handoff&#8209;heavy.</span>
+      <span class="k">ONE PAGE</span>
+    </div>
+    <div class="sheet" id="ovSheet"><svg role="img" aria-label="Phase overview: eight phases, six teams, two release gates, and a matrix of which team acts in each phase" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1640 792" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#8A929C"/></marker><marker id="ahx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C2410C"/></marker></defs>
+<rect width="1640" height="792" fill="#FFFFFF"/>
+<text x="40" y="46" font-size="26" font-weight="700" fill="#1B2430">Cannabis Manufacturing — Phase Overview</text>
+<text x="40" y="70" font-size="13" fill="#5A6470">Eight phases, six teams, two release gates · the one-page view of the AS-IS baseline</text>
+<rect x="40" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#D3DAE2" stroke-width="1.3"/>
+<circle cx="62" cy="125" r="13" fill="#33404F"/>
+<text x="62" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">1</text>
+<text x="206" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 1–4</text>
+<text x="52" y="158" font-size="13" font-weight="700" fill="#1B2430">Part Creation</text>
+<rect x="52" y="180" width="80.0" height="17" rx="8.5" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1"/>
+<text x="60" y="192" font-size="10" font-weight="600" fill="#453C8A">Production</text>
+<rect x="52" y="201" width="54.400000000000006" height="17" rx="8.5" fill="#FBF0E0" stroke="#D97706" stroke-width="1"/>
+<text x="60" y="213" font-size="10" font-weight="600" fill="#92500A">Buying</text>
+<rect x="52" y="222" width="28.8" height="17" rx="8.5" fill="#F9EAEC" stroke="#B03A48" stroke-width="1"/>
+<text x="60" y="234" font-size="10" font-weight="600" fill="#7C2833">QC</text>
+<line x1="52" y1="238" x2="206" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="52" y="250" font-size="9.8" font-weight="500" fill="#4A5563">GE part + RM code + THC</text>
+<text x="52" y="262" font-size="9.8" font-weight="500" fill="#4A5563">BPM created</text>
+<text x="52" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">BUYING SYSTEM · MCS · WSC</text>
+<path d="M 221 200 H 232" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="236" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#D3DAE2" stroke-width="1.3"/>
+<circle cx="258" cy="125" r="13" fill="#33404F"/>
+<text x="258" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">2</text>
+<text x="402" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 5–10</text>
+<text x="248" y="158" font-size="13" font-weight="700" fill="#1B2430">Procurement</text>
+<rect x="248" y="180" width="48.0" height="17" rx="8.5" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1"/>
+<text x="256" y="192" font-size="10" font-weight="600" fill="#23557F">Sales</text>
+<rect x="248" y="201" width="54.400000000000006" height="17" rx="8.5" fill="#FBF0E0" stroke="#D97706" stroke-width="1"/>
+<text x="256" y="213" font-size="10" font-weight="600" fill="#92500A">Buying</text>
+<rect x="248" y="222" width="80.0" height="17" rx="8.5" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1"/>
+<text x="256" y="234" font-size="10" font-weight="600" fill="#453C8A">Production</text>
+<line x1="248" y1="238" x2="402" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="248" y="250" font-size="9.8" font-weight="500" fill="#4A5563">PO raised, linked,</text>
+<text x="248" y="262" font-size="9.8" font-weight="500" fill="#4A5563">documents issued</text>
+<text x="248" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">BUYING SYSTEM · MCS</text>
+<path d="M 417 200 H 428" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="432" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#D3DAE2" stroke-width="1.3"/>
+<circle cx="454" cy="125" r="13" fill="#33404F"/>
+<text x="454" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">3</text>
+<text x="598" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 11–13</text>
+<text x="444" y="158" font-size="13" font-weight="700" fill="#1B2430">Goods In</text>
+<rect x="444" y="180" width="73.6" height="17" rx="8.5" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1"/>
+<text x="452" y="192" font-size="10" font-weight="600" fill="#0A5F60">Warehouse</text>
+<line x1="444" y1="238" x2="598" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="444" y="250" font-size="9.8" font-weight="500" fill="#4A5563">Stock accepted →</text>
+<text x="444" y="262" font-size="9.8" font-weight="500" fill="#4A5563">QUARANTINE</text>
+<text x="444" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">MCS → WSC</text>
+<path d="M 613 200 H 624" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="628" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#2E7D52" stroke-width="2.2"/>
+<circle cx="650" cy="125" r="13" fill="#33404F"/>
+<text x="650" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">4</text>
+<text x="794" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 14–18</text>
+<text x="640" y="158" font-size="13" font-weight="700" fill="#1B2430">QC Testing &amp;</text>
+<text x="640" y="174" font-size="13" font-weight="700" fill="#1B2430">Release</text>
+<rect x="640" y="196" width="28.8" height="17" rx="8.5" fill="#F9EAEC" stroke="#B03A48" stroke-width="1"/>
+<text x="648" y="208" font-size="10" font-weight="600" fill="#7C2833">QC</text>
+<rect x="640" y="217" width="73.6" height="17" rx="8.5" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1"/>
+<text x="648" y="229" font-size="10" font-weight="600" fill="#0A5F60">Warehouse</text>
+<line x1="640" y1="238" x2="794" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="640" y="250" font-size="9.8" font-weight="700" fill="#2E7D52">GATE — green release</text>
+<text x="640" y="262" font-size="9.8" font-weight="700" fill="#2E7D52">label</text>
+<text x="640" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">MCS · WSC</text>
+<path d="M 809 200 H 820" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="824" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#D3DAE2" stroke-width="1.3"/>
+<circle cx="846" cy="125" r="13" fill="#33404F"/>
+<text x="846" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">5</text>
+<text x="990" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 19–22</text>
+<text x="836" y="158" font-size="13" font-weight="700" fill="#1B2430">Manufacturing</text>
+<text x="836" y="174" font-size="13" font-weight="700" fill="#1B2430">Planning</text>
+<rect x="836" y="196" width="48.0" height="17" rx="8.5" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1"/>
+<text x="844" y="208" font-size="10" font-weight="600" fill="#23557F">Sales</text>
+<rect x="836" y="217" width="80.0" height="17" rx="8.5" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1"/>
+<text x="844" y="229" font-size="10" font-weight="600" fill="#453C8A">Production</text>
+<line x1="836" y1="238" x2="990" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="836" y="250" font-size="9.8" font-weight="500" fill="#4A5563">BMR generated, labels</text>
+<text x="836" y="262" font-size="9.8" font-weight="500" fill="#4A5563">printed</text>
+<text x="836" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">SPECIAL ORDER</text>
+<path d="M 1005 200 H 1016" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="1020" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#C2410C" stroke-width="2.2"/>
+<circle cx="1042" cy="125" r="13" fill="#33404F"/>
+<text x="1042" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">6</text>
+<text x="1186" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 23–24</text>
+<text x="1032" y="158" font-size="13" font-weight="700" fill="#1B2430">Material</text>
+<text x="1032" y="174" font-size="13" font-weight="700" fill="#1B2430">Collection</text>
+<rect x="1032" y="196" width="80.0" height="17" rx="8.5" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1"/>
+<text x="1040" y="208" font-size="10" font-weight="600" fill="#453C8A">Production</text>
+<line x1="1032" y1="238" x2="1186" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="1032" y="250" font-size="9.8" font-weight="700" fill="#C2410C">CRITICAL —</text>
+<text x="1032" y="262" font-size="9.8" font-weight="700" fill="#C2410C">label/BMR/batch verified</text>
+<text x="1032" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">CD CAGE · BMR</text>
+<path d="M 1201 200 H 1212" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="1216" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#D3DAE2" stroke-width="1.3"/>
+<circle cx="1238" cy="125" r="13" fill="#33404F"/>
+<text x="1238" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">7</text>
+<text x="1382" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 25–28</text>
+<text x="1228" y="158" font-size="13" font-weight="700" fill="#1B2430">Manufacturing</text>
+<rect x="1228" y="180" width="80.0" height="17" rx="8.5" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1"/>
+<text x="1236" y="192" font-size="10" font-weight="600" fill="#453C8A">Production</text>
+<line x1="1228" y1="238" x2="1382" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="1228" y="250" font-size="9.8" font-weight="500" fill="#4A5563">Graded and packed to 10 g</text>
+<text x="1228" y="262" font-size="9.8" font-weight="500" fill="#4A5563">units</text>
+<text x="1228" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">BMR</text>
+<path d="M 1397 200 H 1408" fill="none" stroke="#8A929C" stroke-width="1.8" marker-end="url(#ah)"/>
+<rect x="1412" y="102" width="178" height="196" rx="10" fill="#FBFCFD" stroke="#2E7D52" stroke-width="2.2"/>
+<circle cx="1434" cy="125" r="13" fill="#33404F"/>
+<text x="1434" y="130" font-size="12.5" font-weight="700" fill="#FFF" text-anchor="middle">8</text>
+<text x="1578" y="129" font-size="10" font-weight="600" fill="#8A929C" text-anchor="end" letter-spacing=".5">STEPS 29–33</text>
+<text x="1424" y="158" font-size="13" font-weight="700" fill="#1B2430">QA Release &amp; Sale</text>
+<rect x="1424" y="180" width="28.8" height="17" rx="8.5" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1"/>
+<text x="1432" y="192" font-size="10" font-weight="600" fill="#1D5436">QA</text>
+<rect x="1424" y="201" width="73.6" height="17" rx="8.5" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1"/>
+<text x="1432" y="213" font-size="10" font-weight="600" fill="#0A5F60">Warehouse</text>
+<rect x="1424" y="222" width="48.0" height="17" rx="8.5" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1"/>
+<text x="1432" y="234" font-size="10" font-weight="600" fill="#23557F">Sales</text>
+<line x1="1424" y1="238" x2="1578" y2="238" stroke="#E8EDF2" stroke-width="1"/>
+<text x="1424" y="250" font-size="9.8" font-weight="700" fill="#2E7D52">GATE — batch released,</text>
+<text x="1424" y="262" font-size="9.8" font-weight="700" fill="#2E7D52">qty adjusted</text>
+<text x="1424" y="288" font-size="9" font-weight="600" fill="#8A929C" letter-spacing=".3">WSC</text>
+<text x="40" y="352" font-size="15" font-weight="700" fill="#1B2430">Where each team acts</text>
+<text x="40" y="371" font-size="11.5" fill="#5A6470">Dot size = number of steps. 15 of 32 transitions cross a team boundary — this is a handoff-heavy process.</text>
+<text x="295.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">1</text>
+<text x="469.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">2</text>
+<text x="643.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">3</text>
+<text x="817.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">4</text>
+<text x="991.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">5</text>
+<text x="1165.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">6</text>
+<text x="1339.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">7</text>
+<text x="1513.0" y="406" font-size="11" font-weight="700" fill="#5A6470" text-anchor="middle">8</text>
+<rect x="40" y="416" width="1560" height="34" fill="#FAFBFC"/>
+<rect x="40" y="423" width="5" height="20" rx="2.5" fill="#3B82C4"/>
+<text x="54" y="437" font-size="11.5" font-weight="600" fill="#23557F">Sales &amp; Planning</text>
+<circle cx="295.0" cy="433" r="2" fill="#DDE2E8"/>
+<circle cx="469.0" cy="433" r="9.2" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="469.0" y="437" font-size="10.5" font-weight="700" fill="#23557F" text-anchor="middle">1</text>
+<circle cx="643.0" cy="433" r="2" fill="#DDE2E8"/>
+<circle cx="817.0" cy="433" r="2" fill="#DDE2E8"/>
+<circle cx="991.0" cy="433" r="9.2" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="991.0" y="437" font-size="10.5" font-weight="700" fill="#23557F" text-anchor="middle">1</text>
+<circle cx="1165.0" cy="433" r="2" fill="#DDE2E8"/>
+<circle cx="1339.0" cy="433" r="2" fill="#DDE2E8"/>
+<circle cx="1513.0" cy="433" r="9.2" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.5"/>
+<text x="1513.0" y="437" font-size="10.5" font-weight="700" fill="#23557F" text-anchor="middle">1</text>
+<rect x="40" y="457" width="5" height="20" rx="2.5" fill="#6B5FBF"/>
+<text x="54" y="471" font-size="11.5" font-weight="600" fill="#453C8A">Production</text>
+<circle cx="295.0" cy="467" r="11.4" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.5"/>
+<text x="295.0" y="471" font-size="10.5" font-weight="700" fill="#453C8A" text-anchor="middle">2</text>
+<circle cx="469.0" cy="467" r="9.2" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.5"/>
+<text x="469.0" y="471" font-size="10.5" font-weight="700" fill="#453C8A" text-anchor="middle">1</text>
+<circle cx="643.0" cy="467" r="2" fill="#DDE2E8"/>
+<circle cx="817.0" cy="467" r="2" fill="#DDE2E8"/>
+<circle cx="991.0" cy="467" r="13.600000000000001" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.5"/>
+<text x="991.0" y="471" font-size="10.5" font-weight="700" fill="#453C8A" text-anchor="middle">3</text>
+<circle cx="1165.0" cy="467" r="11.4" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.5"/>
+<text x="1165.0" y="471" font-size="10.5" font-weight="700" fill="#453C8A" text-anchor="middle">2</text>
+<circle cx="1339.0" cy="467" r="15.8" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.5"/>
+<text x="1339.0" y="471" font-size="10.5" font-weight="700" fill="#453C8A" text-anchor="middle">4</text>
+<circle cx="1513.0" cy="467" r="2" fill="#DDE2E8"/>
+<rect x="40" y="484" width="1560" height="34" fill="#FAFBFC"/>
+<rect x="40" y="491" width="5" height="20" rx="2.5" fill="#D97706"/>
+<text x="54" y="505" font-size="11.5" font-weight="600" fill="#92500A">Buying (India)</text>
+<circle cx="295.0" cy="501" r="9.2" fill="#FBF0E0" stroke="#D97706" stroke-width="1.5"/>
+<text x="295.0" y="505" font-size="10.5" font-weight="700" fill="#92500A" text-anchor="middle">1</text>
+<circle cx="469.0" cy="501" r="15.8" fill="#FBF0E0" stroke="#D97706" stroke-width="1.5"/>
+<text x="469.0" y="505" font-size="10.5" font-weight="700" fill="#92500A" text-anchor="middle">4</text>
+<circle cx="643.0" cy="501" r="2" fill="#DDE2E8"/>
+<circle cx="817.0" cy="501" r="2" fill="#DDE2E8"/>
+<circle cx="991.0" cy="501" r="2" fill="#DDE2E8"/>
+<circle cx="1165.0" cy="501" r="2" fill="#DDE2E8"/>
+<circle cx="1339.0" cy="501" r="2" fill="#DDE2E8"/>
+<circle cx="1513.0" cy="501" r="2" fill="#DDE2E8"/>
+<rect x="40" y="525" width="5" height="20" rx="2.5" fill="#0F8B8D"/>
+<text x="54" y="539" font-size="11.5" font-weight="600" fill="#0A5F60">Warehouse / Goods-In</text>
+<circle cx="295.0" cy="535" r="2" fill="#DDE2E8"/>
+<circle cx="469.0" cy="535" r="2" fill="#DDE2E8"/>
+<circle cx="643.0" cy="535" r="13.600000000000001" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.5"/>
+<text x="643.0" y="539" font-size="10.5" font-weight="700" fill="#0A5F60" text-anchor="middle">3</text>
+<circle cx="817.0" cy="535" r="11.4" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.5"/>
+<text x="817.0" y="539" font-size="10.5" font-weight="700" fill="#0A5F60" text-anchor="middle">2</text>
+<circle cx="991.0" cy="535" r="2" fill="#DDE2E8"/>
+<circle cx="1165.0" cy="535" r="2" fill="#DDE2E8"/>
+<circle cx="1339.0" cy="535" r="2" fill="#DDE2E8"/>
+<circle cx="1513.0" cy="535" r="9.2" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.5"/>
+<text x="1513.0" y="539" font-size="10.5" font-weight="700" fill="#0A5F60" text-anchor="middle">1</text>
+<rect x="40" y="552" width="1560" height="34" fill="#FAFBFC"/>
+<rect x="40" y="559" width="5" height="20" rx="2.5" fill="#B03A48"/>
+<text x="54" y="573" font-size="11.5" font-weight="600" fill="#7C2833">Quality Control (QC)</text>
+<circle cx="295.0" cy="569" r="9.2" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.5"/>
+<text x="295.0" y="573" font-size="10.5" font-weight="700" fill="#7C2833" text-anchor="middle">1</text>
+<circle cx="469.0" cy="569" r="2" fill="#DDE2E8"/>
+<circle cx="643.0" cy="569" r="2" fill="#DDE2E8"/>
+<circle cx="817.0" cy="569" r="15.8" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.5"/>
+<text x="817.0" y="573" font-size="10.5" font-weight="700" fill="#7C2833" text-anchor="middle">4</text>
+<circle cx="991.0" cy="569" r="2" fill="#DDE2E8"/>
+<circle cx="1165.0" cy="569" r="2" fill="#DDE2E8"/>
+<circle cx="1339.0" cy="569" r="2" fill="#DDE2E8"/>
+<circle cx="1513.0" cy="569" r="2" fill="#DDE2E8"/>
+<rect x="40" y="593" width="5" height="20" rx="2.5" fill="#2E7D52"/>
+<text x="54" y="607" font-size="11.5" font-weight="600" fill="#1D5436">Quality Assurance (QA)</text>
+<circle cx="295.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="469.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="643.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="817.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="991.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="1165.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="1339.0" cy="603" r="2" fill="#DDE2E8"/>
+<circle cx="1513.0" cy="603" r="13.600000000000001" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1.5"/>
+<text x="1513.0" y="607" font-size="10.5" font-weight="700" fill="#1D5436" text-anchor="middle">3</text>
+<line x1="40" y1="620" x2="1600" y2="620" stroke="#DDE2E8" stroke-width="1"/>
+<rect x="40.0" y="648" width="770.0" height="88" rx="9" fill="#FBFCFD" stroke="#2E7D52" stroke-width="1.8"/>
+<rect x="40.0" y="648" width="4" height="88" rx="2" fill="#2E7D52"/>
+<text x="56.0" y="672" font-size="11" font-weight="700" fill="#2E7D52" letter-spacing=".8">TWO RELEASE GATES</text>
+<text x="56.0" y="692" font-size="10.8" fill="#4A5563">Phase 4 — QC releases incoming API (green label). Phase 8 — QA releases the</text>
+<text x="56.0" y="707" font-size="10.8" fill="#4A5563">finished batch. Nothing is sellable until both have passed.</text>
+<rect x="830.0" y="648" width="770.0" height="88" rx="9" fill="#FBFCFD" stroke="#C2410C" stroke-width="1.8"/>
+<rect x="830.0" y="648" width="4" height="88" rx="2" fill="#C2410C"/>
+<text x="846.0" y="672" font-size="11" font-weight="700" fill="#C2410C" letter-spacing=".8">ONE EXPEDITED ROUTE</text>
+<text x="846.0" y="692" font-size="10.8" fill="#4A5563">Manufacturing can begin after Phase 3 acceptance, ahead of the Phase 4 QC release,</text>
+<text x="846.0" y="707" font-size="10.8" fill="#4A5563">authorised by email on customer priority. Shown dashed on the detailed map.</text>
+<text x="40" y="774" font-size="10.5" font-style="italic" fill="#8A929C">Baseline draft for stakeholder verification · derived from the stakeholder meeting recording (26 min 42 s) · operational issues and improvement items deliberately excluded.</text>
+</svg></div>
+  </section>
+
+  <section class="pane" id="p-map" role="tabpanel" aria-labelledby="t-map" hidden>
+    <div class="caption">
+      <b>All 33 steps.</b>
+      <span>Flow reads top to bottom. Columns are teams, grey bands are phases. Use the phase buttons to jump.</span>
+      <span class="k">SCROLL DOWN</span>
+    </div>
+    <div class="sheet" id="mapSheet"><svg role="img" aria-label="Detailed vertical swimlane process map, 33 steps top to bottom across seven team columns and eight phase bands" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1706 2832" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#5A6470"/></marker><marker id="ahx" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C2410C"/></marker><marker id="ahg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#9AA1AA"/></marker></defs>
+<rect width="1706" height="2832" fill="#FFFFFF"/>
+<text x="40" y="44" font-size="25" font-weight="700" fill="#1B2430">Cannabis Manufacturing — AS-IS Process Map</text>
+<text x="40" y="68" font-size="13" fill="#5A6470">Baseline draft for stakeholder verification · stakeholder meeting recording (26 min 42 s)</text>
+<text x="40" y="88" font-size="11.5" font-style="italic" fill="#8A929C">Flow reads top to bottom · columns are teams · grey bands are phases. Items marked * need term confirmation.</text>
+<rect id="phase-1" x="40" y="160" width="1626" height="272" fill="#F7FAFC"/>
+<line x1="40" y1="160" x2="1666" y2="160" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="186" font-size="19" font-weight="700" fill="#C6CFD8">1</text>
+<text x="70" y="181" font-size="12" font-weight="600" fill="#5A6470">Part Creation</text>
+<rect id="phase-2" x="40" y="430" width="1626" height="542" fill="#FFFFFF"/>
+<line x1="40" y1="430" x2="1666" y2="430" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="456" font-size="19" font-weight="700" fill="#C6CFD8">2</text>
+<text x="70" y="451" font-size="12" font-weight="600" fill="#5A6470">Procurement</text>
+<rect id="phase-3" x="40" y="970" width="1626" height="272" fill="#F7FAFC"/>
+<line x1="40" y1="970" x2="1666" y2="970" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="996" font-size="19" font-weight="700" fill="#C6CFD8">3</text>
+<text x="70" y="991" font-size="12" font-weight="600" fill="#5A6470">Goods In</text>
+<rect id="phase-4" x="40" y="1240" width="1626" height="542" fill="#FFFFFF"/>
+<line x1="40" y1="1240" x2="1666" y2="1240" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="1266" font-size="19" font-weight="700" fill="#C6CFD8">4</text>
+<text x="70" y="1261" font-size="12" font-weight="600" fill="#5A6470">QC Testing &amp;</text>
+<text x="70" y="1276" font-size="12" font-weight="600" fill="#5A6470">Release</text>
+<rect id="phase-5" x="40" y="1780" width="1626" height="240" fill="#F7FAFC"/>
+<line x1="40" y1="1780" x2="1666" y2="1780" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="1806" font-size="19" font-weight="700" fill="#C6CFD8">5</text>
+<text x="70" y="1801" font-size="12" font-weight="600" fill="#5A6470">Manufacturing</text>
+<text x="70" y="1816" font-size="12" font-weight="600" fill="#5A6470">Planning</text>
+<rect id="phase-6" x="40" y="2018" width="1626" height="122" fill="#FFFFFF"/>
+<line x1="40" y1="2018" x2="1666" y2="2018" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="2044" font-size="19" font-weight="700" fill="#C6CFD8">6</text>
+<text x="70" y="2039" font-size="12" font-weight="600" fill="#5A6470">Material</text>
+<text x="70" y="2054" font-size="12" font-weight="600" fill="#5A6470">Collection</text>
+<rect id="phase-7" x="40" y="2138" width="1626" height="178" fill="#F7FAFC"/>
+<line x1="40" y1="2138" x2="1666" y2="2138" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="2164" font-size="19" font-weight="700" fill="#C6CFD8">7</text>
+<text x="70" y="2159" font-size="12" font-weight="600" fill="#5A6470">Manufacturing</text>
+<rect id="phase-8" x="40" y="2314" width="1626" height="452" fill="#FFFFFF"/>
+<line x1="40" y1="2314" x2="1666" y2="2314" stroke="#E4E8ED" stroke-width="1"/>
+<text x="48" y="2340" font-size="19" font-weight="700" fill="#C6CFD8">8</text>
+<text x="70" y="2335" font-size="12" font-weight="600" fill="#5A6470">QA Release &amp;</text>
+<text x="70" y="2350" font-size="12" font-weight="600" fill="#5A6470">Sale</text>
+<rect x="192" y="104" width="190" height="44" rx="7" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.3"/>
+<rect x="192" y="104" width="190" height="5" rx="2.5" fill="#3B82C4"/>
+<text x="287" y="133" font-size="12.5" font-weight="600" fill="#23557F" text-anchor="middle">Sales &amp; Planning</text>
+<rect x="406" y="104" width="190" height="44" rx="7" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.3"/>
+<rect x="406" y="104" width="190" height="5" rx="2.5" fill="#6B5FBF"/>
+<text x="501" y="133" font-size="12.5" font-weight="600" fill="#453C8A" text-anchor="middle">Production</text>
+<rect x="620" y="104" width="190" height="44" rx="7" fill="#FBF0E0" stroke="#D97706" stroke-width="1.3"/>
+<rect x="620" y="104" width="190" height="5" rx="2.5" fill="#D97706"/>
+<text x="715" y="133" font-size="12.5" font-weight="600" fill="#92500A" text-anchor="middle">Buying (India)</text>
+<rect x="834" y="104" width="190" height="44" rx="7" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.3"/>
+<rect x="834" y="104" width="190" height="5" rx="2.5" fill="#0F8B8D"/>
+<text x="929" y="133" font-size="12.5" font-weight="600" fill="#0A5F60" text-anchor="middle">Warehouse / Goods-In</text>
+<rect x="1048" y="104" width="190" height="44" rx="7" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.3"/>
+<rect x="1048" y="104" width="190" height="5" rx="2.5" fill="#B03A48"/>
+<text x="1143" y="133" font-size="12.5" font-weight="600" fill="#7C2833" text-anchor="middle">Quality Control (QC)</text>
+<rect x="1262" y="104" width="190" height="44" rx="7" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1.3"/>
+<rect x="1262" y="104" width="190" height="5" rx="2.5" fill="#2E7D52"/>
+<text x="1357" y="133" font-size="11" font-weight="600" fill="#1D5436" text-anchor="middle">Quality Assurance (QA)</text>
+<rect x="1476" y="104" width="190" height="44" rx="7" fill="#F2F3F5" stroke="#9AA1AA" stroke-width="1.3"/>
+<rect x="1476" y="104" width="190" height="5" rx="2.5" fill="#9AA1AA"/>
+<text x="1571" y="133" font-size="12.5" font-weight="600" fill="#5C636B" text-anchor="middle">Open — undefined</text>
+<path d="M 501 244 V 253.0 H 715 V 260" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 244 V 253.0 H 1143 V 260" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 715 334 V 343.0 H 501 V 350" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 424 V 433.0 H 287 V 440" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 287 514 V 523.0 H 715 V 530" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 715 604 V 613.0 H 501 V 620" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 694 V 703.0 H 715 V 710" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 715 784 V 800" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 715 874 V 890" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 715 964 V 973.0 H 929 V 980" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 929 1054 V 1070" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 929 1144 V 1160" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 929 1234 V 1243.0 H 1143 V 1250" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1143 1324 V 1340" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1143 1414 V 1430" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1143 1504 V 1520" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1143 1594 V 1610" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<text x="1150" y="1609" font-size="11" font-weight="600" fill="#3F4854">Yes</text>
+<path d="M 1143 1684 V 1693.0 H 929 V 1700" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 929 1774 V 1783.0 H 287 V 1790" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 287 1864 V 1873.0 H 501 V 1880" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 2008 V 2028" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 2128 V 2148" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 501 2304 V 2315.0 H 1357 V 2324" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1357 2398 V 2414" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1357 2488 V 2504" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1357 2578 V 2587.0 H 929 V 2594" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 929 2668 V 2677.0 H 287 V 2684" fill="none" stroke="#5A6470" stroke-width="1.7" marker-end="url(#ah)"/>
+<path d="M 1238 1558 H 1474" fill="none" stroke="#9AA1AA" stroke-width="1.6" stroke-dasharray="6 5" marker-end="url(#ahg)"/>
+<text x="1248" y="1550" font-size="11" font-weight="600" fill="#6B7280">No</text>
+<path d="M 834 1198 H 174 V 2052 H 404" fill="none" stroke="#C2410C" stroke-width="1.7" stroke-dasharray="7 5" marker-end="url(#ahx)"/>
+<text x="182" y="1218" font-size="11" font-weight="600" fill="#C2410C">Expedited — manufacturing</text>
+<text x="182" y="1232" font-size="11" font-weight="600" fill="#C2410C">ahead of QC release</text>
+<text x="182" y="1246" font-size="10.5" fill="#C2410C">(authorised by email)</text>
+<rect x="406" y="1882" width="190" height="126" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<text x="418" y="1902" font-size="12" font-weight="700" fill="#453C8A">Manufacturing planning</text>
+<line x1="416" y1="1909" x2="586" y2="1909" stroke="#6B5FBF" stroke-width="1" opacity=".35"/>
+<circle cx="426" cy="1920" r="9" fill="#6B5FBF"/>
+<text x="426" y="1924" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">20</text>
+<text x="440" y="1920" font-size="9.6" fill="#25303C">Make to Stock request — THC</text>
+<text x="440" y="1931" font-size="9.6" fill="#25303C">BPM, qty, mfg date → expiry</text>
+<circle cx="426" cy="1948" r="9" fill="#6B5FBF"/>
+<text x="426" y="1952" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">21</text>
+<text x="440" y="1952" font-size="9.6" fill="#25303C">Generate BMR</text>
+<circle cx="426" cy="1976" r="9" fill="#6B5FBF"/>
+<text x="426" y="1980" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">22</text>
+<text x="440" y="1980" font-size="9.6" fill="#25303C">Print labels from BMR</text>
+<rect x="406" y="2030" width="190" height="98" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<text x="418" y="2050" font-size="12" font-weight="700" fill="#453C8A">Material collection</text>
+<line x1="416" y1="2057" x2="586" y2="2057" stroke="#6B5FBF" stroke-width="1" opacity=".35"/>
+<circle cx="426" cy="2068" r="9" fill="#6B5FBF"/>
+<text x="426" y="2072" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">23</text>
+<text x="440" y="2068" font-size="9.6" fill="#25303C">Collect released API from CD</text>
+<text x="440" y="2079" font-size="9.6" fill="#25303C">cage *</text>
+<rect x="413" y="2085" width="176" height="25" rx="5" fill="#FFF1E8" stroke="#C2410C" stroke-width="1.4"/>
+<circle cx="426" cy="2096" r="9" fill="#6B5FBF"/>
+<text x="426" y="2100" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">24</text>
+<text x="440" y="2096" font-size="9.6" fill="#25303C">VERIFY — green label ↔ BMR ↔</text>
+<text x="440" y="2107" font-size="9.6" fill="#25303C">description ↔ batch</text>
+<rect x="406" y="2150" width="190" height="154" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<text x="418" y="2170" font-size="12" font-weight="700" fill="#453C8A">Manufacturing</text>
+<line x1="416" y1="2177" x2="586" y2="2177" stroke="#6B5FBF" stroke-width="1" opacity=".35"/>
+<circle cx="426" cy="2188" r="9" fill="#6B5FBF"/>
+<text x="426" y="2192" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">25</text>
+<text x="440" y="2188" font-size="9.6" fill="#25303C">Sort bag by bag · check before</text>
+<text x="440" y="2199" font-size="9.6" fill="#25303C">pouring</text>
+<circle cx="426" cy="2216" r="9" fill="#6B5FBF"/>
+<text x="426" y="2220" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">26</text>
+<text x="440" y="2216" font-size="9.6" fill="#25303C">Grade into three sizes — small</text>
+<text x="440" y="2227" font-size="9.6" fill="#25303C">/ medium / large</text>
+<circle cx="426" cy="2244" r="9" fill="#6B5FBF"/>
+<text x="426" y="2248" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">27</text>
+<text x="440" y="2244" font-size="9.6" fill="#25303C">Combine to 10 g unit (e.g. 4 g</text>
+<text x="440" y="2255" font-size="9.6" fill="#25303C">+ 4 g + 2 g)</text>
+<circle cx="426" cy="2272" r="9" fill="#6B5FBF"/>
+<text x="426" y="2276" font-size="10" font-weight="700" fill="#FFFFFF" text-anchor="middle">28</text>
+<text x="440" y="2272" font-size="9.6" fill="#25303C">Label, seal, wrap → quarantine</text>
+<text x="440" y="2283" font-size="9.6" fill="#25303C">→ cage</text>
+<rect x="406" y="172" width="190" height="72" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<circle cx="422" cy="187" r="10" fill="#6B5FBF"/>
+<text x="422" y="191" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">1</text>
+<text x="501" y="213" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Complete part-creation forms</text>
+<text x="501" y="227" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">GE part form + RM part form</text>
+<text x="501" y="236" font-size="9.4" font-weight="600" fill="#453C8A" text-anchor="middle" letter-spacing="0.4">FORMS</text>
+<rect x="620" y="262" width="190" height="72" rx="9" fill="#FBF0E0" stroke="#D97706" stroke-width="1.6"/>
+<circle cx="636" cy="277" r="10" fill="#D97706"/>
+<text x="636" y="281" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">2</text>
+<text x="715" y="303" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Create GE part</text>
+<text x="715" y="317" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">raw material / API code</text>
+<text x="715" y="326" font-size="9.4" font-weight="600" fill="#92500A" text-anchor="middle" letter-spacing="0.4">BUYING SYSTEM *</text>
+<rect x="1048" y="262" width="190" height="72" rx="9" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.6"/>
+<circle cx="1064" cy="277" r="10" fill="#B03A48"/>
+<text x="1064" y="281" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">3</text>
+<text x="1143" y="303" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Create RM code</text>
+<text x="1143" y="317" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">one per GE part</text>
+<text x="1143" y="326" font-size="9.4" font-weight="600" fill="#7C2833" text-anchor="middle" letter-spacing="0.4">MCS</text>
+<rect x="406" y="352" width="190" height="72" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<circle cx="422" cy="367" r="10" fill="#6B5FBF"/>
+<text x="422" y="371" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">4</text>
+<text x="501" y="393" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Create finished-product part</text>
+<text x="501" y="407" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">THC BPM *, linked to GE part</text>
+<text x="501" y="416" font-size="9.4" font-weight="600" fill="#453C8A" text-anchor="middle" letter-spacing="0.4">WSC ▸ STOCK MONITORING</text>
+<rect x="192" y="442" width="190" height="72" rx="9" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.6"/>
+<circle cx="208" cy="457" r="10" fill="#3B82C4"/>
+<text x="208" y="461" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">5</text>
+<text x="287" y="483" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Advise incoming quantity</text>
+<text x="287" y="497" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">to Buying</text>
+<text x="287" y="506" font-size="9.4" font-weight="600" fill="#23557F" text-anchor="middle" letter-spacing="0.4">EMAIL</text>
+<rect x="620" y="532" width="190" height="72" rx="9" fill="#FBF0E0" stroke="#D97706" stroke-width="1.6"/>
+<circle cx="636" cy="547" r="10" fill="#D97706"/>
+<text x="636" y="551" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">6</text>
+<text x="715" y="573" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Raise Purchase Request</text>
+<text x="715" y="587" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">for advised quantity</text>
+<text x="715" y="596" font-size="9.4" font-weight="600" fill="#92500A" text-anchor="middle" letter-spacing="0.4">BUYING SYSTEM</text>
+<rect x="406" y="622" width="190" height="72" rx="9" fill="#EEECF9" stroke="#6B5FBF" stroke-width="1.6"/>
+<circle cx="422" cy="637" r="10" fill="#6B5FBF"/>
+<text x="422" y="641" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">7</text>
+<text x="501" y="668" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Approve PR</text>
+<text x="501" y="686" font-size="9.4" font-weight="600" fill="#453C8A" text-anchor="middle" letter-spacing="0.4">BUYING SYSTEM</text>
+<rect x="620" y="712" width="190" height="72" rx="9" fill="#FBF0E0" stroke="#D97706" stroke-width="1.6"/>
+<circle cx="636" cy="727" r="10" fill="#D97706"/>
+<text x="636" y="731" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">8</text>
+<text x="715" y="758" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Generate Purchase Order</text>
+<text x="715" y="776" font-size="9.4" font-weight="600" fill="#92500A" text-anchor="middle" letter-spacing="0.4">BUYING SYSTEM</text>
+<rect x="620" y="802" width="190" height="72" rx="9" fill="#FBF0E0" stroke="#D97706" stroke-width="1.6"/>
+<circle cx="636" cy="817" r="10" fill="#D97706"/>
+<text x="636" y="821" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">9</text>
+<text x="715" y="843" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Product linking</text>
+<text x="715" y="857" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">PO ↔ MCS product ↔ RM code</text>
+<text x="715" y="866" font-size="9.4" font-weight="600" fill="#92500A" text-anchor="middle" letter-spacing="0.4">MCS / BUYING</text>
+<rect x="620" y="892" width="190" height="72" rx="9" fill="#FBF0E0" stroke="#D97706" stroke-width="1.6"/>
+<circle cx="636" cy="907" r="10" fill="#D97706"/>
+<text x="636" y="911" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">10</text>
+<text x="715" y="933" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Procurement + COC checklist</text>
+<text x="715" y="947" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">Documents to Goods-In</text>
+<text x="715" y="956" font-size="9.4" font-weight="600" fill="#92500A" text-anchor="middle" letter-spacing="0.4">DOCUMENTS</text>
+<rect x="834" y="982" width="190" height="72" rx="9" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.6"/>
+<circle cx="850" cy="997" r="10" fill="#0F8B8D"/>
+<text x="850" y="1001" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">11</text>
+<text x="929" y="1028" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Receive delivery</text>
+<text x="929" y="1046" font-size="9.4" font-weight="600" fill="#0A5F60" text-anchor="middle" letter-spacing="0.4">GOODS-IN</text>
+<rect x="834" y="1072" width="190" height="72" rx="9" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.6"/>
+<circle cx="850" cy="1087" r="10" fill="#0F8B8D"/>
+<text x="850" y="1091" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">12</text>
+<text x="929" y="1113" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Match documents + PR</text>
+<text x="929" y="1127" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">against physical goods</text>
+<text x="929" y="1136" font-size="9.4" font-weight="600" fill="#0A5F60" text-anchor="middle" letter-spacing="0.4">GOODS-IN</text>
+<rect x="834" y="1162" width="190" height="72" rx="9" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.6"/>
+<circle cx="850" cy="1177" r="10" fill="#0F8B8D"/>
+<text x="850" y="1181" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">13</text>
+<text x="929" y="1203" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Accept consignment</text>
+<text x="929" y="1217" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">Stock → WSC QUARANTINE</text>
+<text x="929" y="1226" font-size="9.4" font-weight="600" fill="#0A5F60" text-anchor="middle" letter-spacing="0.4">MCS → WSC</text>
+<rect x="1048" y="1252" width="190" height="72" rx="9" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.6"/>
+<circle cx="1064" cy="1267" r="10" fill="#B03A48"/>
+<text x="1064" y="1271" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">14</text>
+<text x="1143" y="1293" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Perform PCL</text>
+<text x="1143" y="1307" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">(Product Checklist)</text>
+<text x="1143" y="1316" font-size="9.4" font-weight="600" fill="#7C2833" text-anchor="middle" letter-spacing="0.4">QC</text>
+<rect x="1048" y="1342" width="190" height="72" rx="9" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.6"/>
+<circle cx="1064" cy="1357" r="10" fill="#B03A48"/>
+<text x="1064" y="1361" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">15</text>
+<text x="1143" y="1383" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Draw samples</text>
+<text x="1143" y="1397" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">YELLOW sampling label</text>
+<text x="1143" y="1406" font-size="9.4" font-weight="600" fill="#7C2833" text-anchor="middle" letter-spacing="0.4">MCS</text>
+<rect x="1048" y="1432" width="190" height="72" rx="9" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.6"/>
+<circle cx="1064" cy="1447" r="10" fill="#B03A48"/>
+<text x="1064" y="1451" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">16</text>
+<text x="1143" y="1473" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Testing</text>
+<text x="1143" y="1487" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">10 d glass foam * / 6 d other</text>
+<text x="1143" y="1496" font-size="9.4" font-weight="600" fill="#7C2833" text-anchor="middle" letter-spacing="0.4">MCS</text>
+<path d="M 1143 1522 L 1238 1558 L 1143 1594 L 1048 1558 Z" fill="#FDF3D9" stroke="#C08A16" stroke-width="1.8"/>
+<text x="1143" y="1563" font-size="14" font-weight="700" fill="#7A5709" text-anchor="middle">Pass?</text>
+<rect x="1476" y="1522" width="190" height="72" rx="9" fill="#F7F8F9" stroke="#9AA1AA" stroke-width="1.5" stroke-dasharray="6 5"/>
+<text x="1571" y="1554" font-size="11" font-style="italic" fill="#6B7280" text-anchor="middle">Reject / retest route</text>
+<text x="1571" y="1569" font-size="11" font-style="italic" fill="#6B7280" text-anchor="middle">not described in source</text>
+<rect x="1048" y="1612" width="190" height="72" rx="9" fill="#F9EAEC" stroke="#B03A48" stroke-width="1.6"/>
+<circle cx="1064" cy="1627" r="10" fill="#B03A48"/>
+<text x="1064" y="1631" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">17</text>
+<text x="1143" y="1653" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">GREEN release label</text>
+<text x="1143" y="1667" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">Document quantity consumed</text>
+<text x="1143" y="1676" font-size="9.4" font-weight="600" fill="#7C2833" text-anchor="middle" letter-spacing="0.4">MCS</text>
+<rect x="834" y="1702" width="190" height="72" rx="9" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.6"/>
+<circle cx="850" cy="1717" r="10" fill="#0F8B8D"/>
+<text x="850" y="1721" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">18</text>
+<text x="929" y="1743" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Enter consumed quantity</text>
+<text x="929" y="1757" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">Stock write-off</text>
+<text x="929" y="1766" font-size="9.4" font-weight="600" fill="#0A5F60" text-anchor="middle" letter-spacing="0.4">MCS / WSC</text>
+<rect x="192" y="1792" width="190" height="72" rx="9" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.6"/>
+<circle cx="208" cy="1807" r="10" fill="#3B82C4"/>
+<text x="208" y="1811" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">19</text>
+<text x="287" y="1833" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Manufacturing plan issued</text>
+<text x="287" y="1847" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">what to make + when</text>
+<text x="287" y="1856" font-size="9.4" font-weight="600" fill="#23557F" text-anchor="middle" letter-spacing="0.4">PLAN</text>
+<rect x="1262" y="2326" width="190" height="72" rx="9" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1.6"/>
+<circle cx="1278" cy="2341" r="10" fill="#2E7D52"/>
+<text x="1278" y="2345" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">29</text>
+<text x="1357" y="2367" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Check stock vs BMR quantity</text>
+<text x="1357" y="2381" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">Verify labels</text>
+<text x="1357" y="2390" font-size="9.4" font-weight="600" fill="#1D5436" text-anchor="middle" letter-spacing="0.4">BMR</text>
+<rect x="1262" y="2416" width="190" height="72" rx="9" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1.6"/>
+<circle cx="1278" cy="2431" r="10" fill="#2E7D52"/>
+<text x="1278" y="2435" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">30</text>
+<text x="1357" y="2457" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Final checks</text>
+<text x="1357" y="2471" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">BMR handed over for release</text>
+<text x="1357" y="2480" font-size="9.4" font-weight="600" fill="#1D5436" text-anchor="middle" letter-spacing="0.4">BMR</text>
+<rect x="1262" y="2506" width="190" height="72" rx="9" fill="#E6F3EB" stroke="#2E7D52" stroke-width="1.6"/>
+<circle cx="1278" cy="2521" r="10" fill="#2E7D52"/>
+<text x="1278" y="2525" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">31</text>
+<text x="1357" y="2552" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Release batch</text>
+<text x="1357" y="2570" font-size="9.4" font-weight="600" fill="#1D5436" text-anchor="middle" letter-spacing="0.4">QA</text>
+<rect x="834" y="2596" width="190" height="72" rx="9" fill="#E3F4F3" stroke="#0F8B8D" stroke-width="1.6"/>
+<circle cx="850" cy="2611" r="10" fill="#0F8B8D"/>
+<text x="850" y="2615" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">32</text>
+<text x="929" y="2637" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Adjust quantity</text>
+<text x="929" y="2651" font-size="11.2" font-weight="400" fill="#25303C" text-anchor="middle">theoretical → actual</text>
+<text x="929" y="2660" font-size="9.4" font-weight="600" fill="#0A5F60" text-anchor="middle" letter-spacing="0.4">WSC</text>
+<rect x="192" y="2686" width="190" height="72" rx="9" fill="#E8F1F9" stroke="#3B82C4" stroke-width="1.6"/>
+<circle cx="208" cy="2701" r="10" fill="#3B82C4"/>
+<text x="208" y="2705" font-size="10.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">33</text>
+<text x="287" y="2732" font-size="11.2" font-weight="700" fill="#25303C" text-anchor="middle">Available for sale</text>
+<text x="287" y="2750" font-size="9.4" font-weight="600" fill="#23557F" text-anchor="middle" letter-spacing="0.4">WSC</text>
+<text x="406" y="164" font-size="10.5" font-weight="700" fill="#2E7D52" letter-spacing="1">▶ PROCESS START</text>
+<text x="192" y="2776" font-size="10.5" font-weight="700" fill="#2E7D52" letter-spacing="1">■ PROCESS END</text>
+<text x="40" y="2812" font-size="11" font-style="italic" fill="#8A929C">Systems: MCS (material control · QC) · WSC (warehouse stock) · Special Order (Make to Stock / BMR) · Buying system. Operational issues excluded — this records the process as it runs today.</text>
+</svg></div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var MAP_W=1706;
+  var scroll=document.getElementById('scroll');
+  var tOv=document.getElementById('t-ov'), tMap=document.getElementById('t-map');
+  var pOv=document.getElementById('p-ov'), pMap=document.getElementById('p-map');
+  var tools=document.getElementById('tools'), rail=document.getElementById('rail');
+  var sheet=document.getElementById('mapSheet'), pct=document.getElementById('pct');
+  var zoom=1;
+
+  var PHASES=['Part Creation','Procurement','Goods In','QC Testing &amp; Release',
+              'Manufacturing Planning','Material Collection','Manufacturing','QA Release &amp; Sale'];
+
+  PHASES.forEach(function(name,i){
+    var b=document.createElement('button');
+    b.className='pchip'; b.type='button';
+    b.innerHTML='<span class="n">'+(i+1)+'</span>'+name;
+    b.addEventListener('click',function(){
+      var t=document.getElementById('phase-'+(i+1));
+      if(!t) return;
+      var r=t.getBoundingClientRect(), s=scroll.getBoundingClientRect();
+      scroll.scrollTop += (r.top - s.top) - 16;
+    });
+    rail.appendChild(b);
+  });
+
+  function applyZoom(){
+    sheet.style.width=Math.round(MAP_W*zoom)+'px';
+    pct.textContent=Math.round(zoom*100)+'%';
+  }
+  function fitWidth(){
+    var avail=scroll.clientWidth-32;
+    zoom=Math.min(avail/MAP_W,1.6); applyZoom();
+  }
+  document.getElementById('zin').addEventListener('click',function(){ zoom=Math.min(zoom*1.25,3); applyZoom(); });
+  document.getElementById('zout').addEventListener('click',function(){ zoom=Math.max(zoom/1.25,.25); applyZoom(); });
+  document.getElementById('fitw').addEventListener('click',fitWidth);
+
+  function show(which){
+    var map = which==='map';
+    tOv.setAttribute('aria-selected',String(!map));
+    tMap.setAttribute('aria-selected',String(map));
+    pOv.hidden=map; pMap.hidden=!map;
+    tools.hidden=!map; rail.hidden=!map;
+    scroll.scrollTop=0;
+    if(map && !sheet.style.width) fitWidth();
+  }
+  tOv.addEventListener('click',function(){show('ov')});
+  tMap.addEventListener('click',function(){show('map')});
+
+  window.addEventListener('keydown',function(e){
+    if(pMap.hidden) return;
+    if(e.key==='+'||e.key==='='){ zoom=Math.min(zoom*1.25,3); applyZoom(); }
+    else if(e.key==='-'||e.key==='_'){ zoom=Math.max(zoom/1.25,.25); applyZoom(); }
+    else if(e.key==='0'){ fitWidth(); }
+  });
+
+  var t; window.addEventListener('resize',function(){
+    clearTimeout(t); t=setTimeout(function(){ if(!pMap.hidden) fitWidth(); },160);
+  });
+
+  applyZoom();
+})();
+</script>
